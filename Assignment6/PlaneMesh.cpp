@@ -112,8 +112,8 @@ void PlaneMesh::draw(glm::vec3 lightPos, glm::mat4 V, glm::mat4 P) {
     glBindVertexArray(vao);
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);  // Wireframe mode
     //std::cout << "Drawing PlaneMesh with " << numIndices << " indices." << std::endl;
-    glPatchParameteri(GL_PATCH_VERTICES, 4);
-    glDrawElements(GL_PATCHES, numIndices, GL_UNSIGNED_INT, 0);
+    //glPatchParameteri(GL_PATCH_VERTICES, 4);
+    glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_INT, 0);
 
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);  // Restore
     glBindVertexArray(0);

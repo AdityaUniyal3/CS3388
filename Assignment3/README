@@ -1,0 +1,74 @@
+Bezier Spline Editor (CS3388 Assignment 3)
+
+Overview
+This project is a basic Bezier spline editor built using C++ with OpenGL and GLFW. It allows you to create and manipulate a cubic Bezier spline by adding nodes with the mouse, dragging nodes or their control handles, and resetting the scene. The spline is rendered using a series of cubic Bezier curves, and the program is designed to handle high-DPI displays by scaling mouse input from logical window coordinates to the actual framebuffer size.
+
+Features
+Node Creation:
+Click in an empty area to create a new node. A control handle is automatically placed 50 pixels above the node. The closest existing endpoint is converted into an interior node with two symmetric control handles.
+
+Dragging:
+Drag a node or its control handle with the left mouse button. When dragging a control handle of an interior node, the other handle is automatically adjusted to maintain symmetry.
+
+Dotted Line Rendering:
+Control handles are connected to their corresponding node by dotted lines for clarity.
+
+High-DPI Support:
+The program scales mouse coordinates from the logical window size to the actual framebuffer size so that node placement and picking are accurate on all displays.
+
+Scene Reset:
+Press the E key to clear all nodes and reset the scene.
+
+Requirements
+A C++ compiler that supports C++11 or later (e.g., g++ or clang++).
+The GLFW library for window management and input handling.
+OpenGL (commonly provided by your system).
+Compilation
+Compile the project using a command similar to the following (adjust the linker flags as necessary for your system):
+
+bash
+Copy
+g++ -std=c++11 -o bezier_spline main.cpp -lglfw -lGL
+Note: On Windows or macOS, you may need additional libraries or different linker flags.
+
+Running the Program
+Run the compiled executable, optionally passing the desired window width and height as command-line arguments:
+
+bash
+Copy
+./bezier_spline [width] [height]
+For example, to run with an 800×600 window:
+
+bash
+Copy
+./bezier_spline 800 600
+Controls
+Left Mouse Button:
+
+Click on empty space: Create a new node at the cursor's location.
+Click and drag on a node or control handle: Move the node or handle accordingly.
+Keyboard:
+
+Press E to reset the scene (clearing all nodes and handles).
+How It Works
+Coordinate Systems & Scaling:
+
+The program uses an orthographic projection that matches the actual framebuffer size.
+Mouse coordinates are reported in the logical window size but are scaled to the framebuffer size using computed scale factors.
+The Y coordinate is inverted (since mouse coordinates start at the top-left, while OpenGL uses a bottom-left origin).
+Spline Rendering:
+
+Cubic Bezier curves are drawn by subdividing the curve into 200 line segments.
+Nodes are rendered as blue squares, while control handles are rendered as black circles.
+Dotted lines (drawn using a custom function) connect nodes to their control handles.
+User Interaction:
+
+When you click, the program checks if you clicked on an existing node or control handle (using a small pick radius).
+If not, a new node is created.
+During dragging, the program updates the node or handle position based on the scaled mouse coordinates.
+Troubleshooting
+Mouse Position Issues:
+If nodes aren’t placed exactly where you click, ensure that your system’s DPI scaling is being correctly handled by checking the scale factors computed from the window and framebuffer sizes.
+
+Library Issues:
+Ensure that GLFW and OpenGL are installed and properly linked during compilation.

@@ -1,0 +1,44 @@
+# README - Rotating Dogs OpenGL Program (EXERCISE 1)
+
+# Overview
+This program uses OpenGL and GLFW to render eight rotating dog shapes positioned evenly around a circle. Each dog spins in place while maintaining its position on the circular path.
+
+# Features
+Loads dog shape vertex data from dog.txt.
+Positions 8 dogs evenly around a circle of radius 25, centered at (30,30).
+Each dog spins in place at 1° per frame.
+Uses GLFW for window creation and OpenGL for rendering.
+
+# How It Works
+Load Dog Shape:
+    Reads (x, y) coordinates from dog.txt.
+    Initialize Circle Positions:
+    Dogs are positioned at angles {0°, 45°, 90°, ... 315°} around the circle.
+Render Loop:
+    Clears the screen.
+    Computes and updates the dog's position on the circle.
+    Applies local rotation to each dog.
+    Continuously updates spin_angles[] to make them spin in place.
+
+
+# README - OpenGL Dot Plot Program (EXERCISE 2)
+
+# Overview
+This program generates a randomized dot plot using OpenGL and GLFW. It follows a recursive midpoint selection rule where each point is iteratively moved toward a randomly selected corner of a square. The selection avoids diagonally opposite corners.
+
+# Features
+Plots up to 5 million points (N_MAX = 5,000,000).
+Uses OpenGL GL_POINTS for efficient rendering.
+Midpoint Algorithm ensures an interesting chaotic pattern.
+Randomized corner selection prevents symmetry artifacts.
+
+# How It Works
+Random Initial Point:
+    Starts at a random location inside the square [−1,1]×[−1,1].
+Midpoint Rule:
+    Repeatedly chooses a random corner.
+    Moves halfway toward the chosen corner.
+    Ensures no two consecutive choices are diagonal opposites.
+Rendering:
+    Uses glOrtho() to set a normalized 2D coordinate system.
+    Calls glVertex2f() to plot each point.

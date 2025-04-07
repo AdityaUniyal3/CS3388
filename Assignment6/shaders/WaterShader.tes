@@ -1,0 +1,63 @@
+#version 400
+layout(quads, equal_spacing) in;
+
+uniform mat4 MVP;
+
+// Inputs must match TCS outputs exactly
+in vec3 normal_te[];
+in vec3 position_te[];
+in vec3 eye_te[];
+in vec3 light_te[];
+in vec2 uv_te[];
+
+out vec3 normal_tes;
+out vec3 position_tes;
+out vec3 eye_tes;
+out vec3 light_tes;
+out vec2 uv_tes;
+
+uniform sampler2D disptex;
+uniform float time;
+
+void main() {
+    // Position interpolation
+    vec4 p0 = gl_in[0].gl_Position;
+    vec4 p1 = gl_in[1].gl_Position;
+    vec4 p2 = gl_in[2].gl_Position;
+    vec4 p3 = gl_in[3].gl_Position;
+
+    vec4 m1 = mix(p0, p1, gl_TessCoord.x);
+    vec4 m2 = mix(p3, p2, gl_TessCoord.x);
+    gl_Position = MVP * mix(m1, m2, gl_TessCoord.y);
+
+    // Attribute interpolation
+    normal_tes = mix(
+        mix(normal_te[0], normal_te[1], gl_TessCoord.x),
+        mix(normal_te[3], normal_te[2], gl_TessCoord.x),
+        gl_TessCoord.y
+    );
+
+    position_tes = mix(
+        mix(position_te[0], position_te[1], gl_TessCoord.x),
+        mix(position_te[3], position_te[2], gl_TessCoord.x),
+        gl_TessCoord.y
+    );
+
+    eye_tes = mix(
+        mix(eye_te[0], eye_te[1], gl_TessCoord.x),
+        mix(eye_te[3], eye_te[2], gl_TessCoord.x),
+        gl_TessCoord.y
+    );
+
+    light_tes = mix(
+        mix(light_te[0], light_te[1], gl_TessCoord.x),
+        mix(light_te[3], light_te[2], gl_TessCoord.x),
+        gl_TessCoord.y
+    );
+
+    uv_tes = mix(
+        mix(uv_te[0], uv_te[1], gl_TessCoord.x),
+        mix(uv_te[3], uv_te[2], gl_TessCoord.x),
+        gl_TessCoord.y
+    );
+}

@@ -19,6 +19,8 @@ private:
 
     GLuint vao, vboVerts, vboNormals, ebo;
     GLuint shaderProgram;
+    GLuint outerTessLoc;
+    GLuint innerTessLoc;
 
     int numVerts, numIndices;
     float min, max;

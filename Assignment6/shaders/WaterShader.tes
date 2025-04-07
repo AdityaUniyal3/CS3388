@@ -2,6 +2,9 @@
 layout(quads, equal_spacing) in;
 
 uniform mat4 MVP;
+uniform mat4 M;  // Model matrix only
+uniform mat4 V;  // View matrix only
+uniform mat4 P;  // Projection matrix only
 
 // Inputs must match TCS outputs exactly
 in vec3 normal_te[];
@@ -20,26 +23,28 @@ uniform sampler2D disptex;
 uniform float time;
 
 void main() {
-    // Position interpolation
-    vec4 p0 = gl_in[0].gl_Position;
-    vec4 p1 = gl_in[1].gl_Position;
-    vec4 p2 = gl_in[2].gl_Position;
-    vec4 p3 = gl_in[3].gl_Position;
+    // 1. First interpolate in MODEL SPACE
+    vec3 modelPos = mix(
+        mix(position_te[0], position_te[1], gl_TessCoord.x),
+        mix(position_te[3], position_te[2], gl_TessCoord.x),
+        gl_TessCoord.y
+    );
 
-    vec4 m1 = mix(p0, p1, gl_TessCoord.x);
-    vec4 m2 = mix(p3, p2, gl_TessCoord.x);
-    gl_Position = MVP * mix(m1, m2, gl_TessCoord.y);
+    // 2. Apply model matrix to get world position
+    vec4 worldPos = M * vec4(modelPos, 1.0);
+    
+    // 3. Apply wave displacement in WORLD SPACE (if needed)
+    // worldPos.y += sin(time + worldPos.x) * 0.1; // Example wave
+    
+    // 4. Transform through view and projection
+    gl_Position = P * V * worldPos;
+
+    position_tes = worldPos.xyz;
 
     // Attribute interpolation
     normal_tes = mix(
         mix(normal_te[0], normal_te[1], gl_TessCoord.x),
         mix(normal_te[3], normal_te[2], gl_TessCoord.x),
-        gl_TessCoord.y
-    );
-
-    position_tes = mix(
-        mix(position_te[0], position_te[1], gl_TessCoord.x),
-        mix(position_te[3], position_te[2], gl_TessCoord.x),
         gl_TessCoord.y
     );
 

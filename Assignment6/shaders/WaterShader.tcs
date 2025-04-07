@@ -1,15 +1,36 @@
-#version 410 core
+#version 400
 layout(vertices = 4) out;
 
-void main() {
-    gl_out[gl_InvocationID].gl_Position = gl_in[gl_InvocationID].gl_Position;
+// Inputs from Vertex Shader (must match VS outputs!)
+in vec3 position_tcs[];
+in vec3 normal_tcs[];
+in vec2 uv_tcs[];
+in vec3 eye_tcs[];
+in vec3 light_tcs[];
 
-    if (gl_InvocationID == 0) {
-        gl_TessLevelInner[0] = 16.0;
-        gl_TessLevelInner[1] = 16.0;
-        gl_TessLevelOuter[0] = 16.0;
-        gl_TessLevelOuter[1] = 16.0;
-        gl_TessLevelOuter[2] = 16.0;
-        gl_TessLevelOuter[3] = 16.0;
-    }
+// Outputs to Tessellation Evaluation Shader (TES)
+out vec3 position_te[];
+out vec3 normal_te[];
+out vec2 uv_te[];
+out vec3 eye_te[];
+out vec3 light_te[];
+
+uniform float innerTess;
+uniform float outerTess;
+
+void main() {
+    // Pass through all attributes
+    position_te[gl_InvocationID] = position_tcs[gl_InvocationID];
+    normal_te[gl_InvocationID] = normal_tcs[gl_InvocationID];
+    uv_te[gl_InvocationID] = uv_tcs[gl_InvocationID];
+    eye_te[gl_InvocationID] = eye_tcs[gl_InvocationID];
+    light_te[gl_InvocationID] = light_tcs[gl_InvocationID];
+
+    // Set tessellation levels
+    gl_TessLevelInner[0] = innerTess;
+    gl_TessLevelInner[1] = innerTess;
+    gl_TessLevelOuter[0] = outerTess;
+    gl_TessLevelOuter[1] = outerTess;
+    gl_TessLevelOuter[2] = outerTess;
+    gl_TessLevelOuter[3] = outerTess;
 }

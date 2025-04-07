@@ -24,8 +24,10 @@ PlaneMesh::PlaneMesh(float min, float max, float stepsize) {
     //     "shaders/WaterShader.fragmentshader"
     // );
 
-    shaderProgram = LoadShaders("shaders/debug.vert", "", "", "", "shaders/debug.frag");
+    shaderProgram = LoadShaders("shaders/debug.vert", "shaders/WaterShader.tcs", "shaders/WaterShader.tes", "", "shaders/debug.frag");
 
+    outerTessLoc = glGetUniformLocation(shaderProgram, "outerTess");
+    innerTessLoc = glGetUniformLocation(shaderProgram, "innerTess");
 
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
@@ -93,12 +95,20 @@ void PlaneMesh::planeMeshQuads(float min, float max, float stepsize) {
 void PlaneMesh::draw(glm::vec3 lightPos, glm::mat4 V, glm::mat4 P) {
     glUseProgram(shaderProgram);
 
+    glUniform1f(outerTessLoc, 16.0f); // As required by assignment
+    glUniform1f(innerTessLoc, 16.0f);
+
     glm::mat4 M = glm::mat4(1.0f);
     glm::mat4 MVP = P * V * M;
 
-    GLuint mvpLoc = glGetUniformLocation(shaderProgram, "MVP");
-    glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(MVP));
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "MVP"), 1, GL_FALSE, glm::value_ptr(MVP));
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "M"), 1, GL_FALSE, glm::value_ptr(M));
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "V"), 1, GL_FALSE, glm::value_ptr(V));
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "P"), 1, GL_FALSE, glm::value_ptr(P));
 
+    glm::vec3 eyePos = glm::vec3(glm::inverse(V)[3]); // Extract camera position from view matrix
+    glUniform3fv(glGetUniformLocation(shaderProgram, "lightPos"), 1, glm::value_ptr(lightPos));
+    glUniform3fv(glGetUniformLocation(shaderProgram, "eyePos"), 1, glm::value_ptr(eyePos));
     // GLuint lightPosLoc = glGetUniformLocation(shaderProgram, "lightPos_worldspace");
     // glUniform3fv(lightPosLoc, 1, glm::value_ptr(lightPos));
 
@@ -110,10 +120,10 @@ void PlaneMesh::draw(glm::vec3 lightPos, glm::mat4 V, glm::mat4 P) {
     // glDrawElements(GL_PATCHES, numIndices, GL_UNSIGNED_INT, 0);
     // glBindVertexArray(0);
     glBindVertexArray(vao);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);  // Wireframe mode
     //std::cout << "Drawing PlaneMesh with " << numIndices << " indices." << std::endl;
-    //glPatchParameteri(GL_PATCH_VERTICES, 4);
-    glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_INT, 0);
+    glPatchParameteri(GL_PATCH_VERTICES, 4);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);  // Wireframe mode
+    glDrawElements(GL_PATCHES, numIndices, GL_UNSIGNED_INT, 0);
 
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);  // Restore
     glBindVertexArray(0);

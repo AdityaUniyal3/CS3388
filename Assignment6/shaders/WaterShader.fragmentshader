@@ -1,11 +1,27 @@
-#version 410 core
-in vec3 frag_normal;
+#version 400
+in vec3 position_gs;
+in vec3 normal_gs;
+in vec2 uv_gs;
 out vec4 color;
 
+uniform sampler2D waterTex;
+uniform vec3 lightPos;
+uniform vec3 eyePos;
+
 void main() {
-    vec3 lightDir = normalize(vec3(0.5, 1.0, 0.5));
-    float diff = max(dot(normalize(frag_normal), lightDir), 0.0);
-    vec3 diffuse = vec3(0.2, 0.6, 1.0) * diff;
-    vec3 ambient = vec3(0.05, 0.1, 0.2);
-    color = vec4(diffuse + ambient, 1.0);
+    // Phong lighting components
+    vec3 lightDir = normalize(lightPos - position_gs);
+    vec3 viewDir = normalize(eyePos - position_gs);
+    vec3 reflectDir = reflect(-lightDir, normal_gs);
+    
+    // Light calculations
+    float ambient = 0.1;
+    float diffuse = max(dot(normal_gs, lightDir), 0.0);
+    float specular = pow(max(dot(viewDir, reflectDir), 0.0), 32.0);
+    
+    // Combine with texture
+    vec3 texColor = texture(waterTex, uv_gs).rgb;
+    vec3 finalColor = (ambient + diffuse) * texColor + specular * vec3(0.8);
+    
+    color = vec4(finalColor, 1.0);
 }

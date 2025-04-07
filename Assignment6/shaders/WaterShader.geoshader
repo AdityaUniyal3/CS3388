@@ -1,19 +1,22 @@
-#version 410 core
+#version 400
+
 layout(triangles) in;
 layout(triangle_strip, max_vertices = 3) out;
 
 in vec3 position_tes[];
-out vec3 frag_normal;
+in vec3 normal_tes[];  // Now using TES-calculated normals
+in vec2 uv_tes[];
+
+out vec3 position_gs;
+out vec2 uv_gs;
+out vec3 normal_gs;
 
 void main() {
-    vec3 p0 = position_tes[0];
-    vec3 p1 = position_tes[1];
-    vec3 p2 = position_tes[2];
-
-    vec3 normal = normalize(cross(p1 - p0, p2 - p0));
-
-    for (int i = 0; i < 3; ++i) {
-        frag_normal = normal;
+    for(int i = 0; i < 3; i++) {
+        // SIMPLIFY TO PASS-THROUGH ONLY
+        position_gs = position_tes[i];
+        normal_gs = normal_tes[i];  // Use TES-calculated normal
+        uv_gs = uv_tes[i];
         gl_Position = gl_in[i].gl_Position;
         EmitVertex();
     }

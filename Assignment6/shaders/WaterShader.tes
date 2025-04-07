@@ -5,6 +5,7 @@ uniform mat4 MVP;
 uniform mat4 M;  // Model matrix only
 uniform mat4 V;  // View matrix only
 uniform mat4 P;  // Projection matrix only
+uniform float time;
 
 // Inputs must match TCS outputs exactly
 in vec3 normal_te[];
@@ -20,7 +21,21 @@ out vec3 light_tes;
 out vec2 uv_tes;
 
 uniform sampler2D disptex;
-uniform float time;
+
+// ADD THIS WAVE FUNCTION
+vec3 GerstnerWave(vec3 pos, float amplitude, float frequency, float speed, vec2 direction) {
+    float w = 2.0 * 3.14159 / frequency;
+    float phase = speed * w;
+    float q = 0.5;
+    float d = dot(direction, pos.xz);
+    float calc = w * d + phase * time;
+    
+    return vec3(
+        q * amplitude * direction.x * cos(calc),
+        amplitude * sin(calc),
+        q * amplitude * direction.y * cos(calc)
+    );
+}
 
 void main() {
     // 1. First interpolate in MODEL SPACE
@@ -33,20 +48,23 @@ void main() {
     // 2. Apply model matrix to get world position
     vec4 worldPos = M * vec4(modelPos, 1.0);
     
-    // 3. Apply wave displacement in WORLD SPACE (if needed)
-    // worldPos.y += sin(time + worldPos.x) * 0.1; // Example wave
-    
+    // ADD WAVE CALCULATIONS HERE (moved from GS)
+    worldPos.xyz += GerstnerWave(worldPos.xyz, 0.1, 2.0, 0.5, normalize(vec2(1.0, 0.5)));
+    worldPos.xyz += GerstnerWave(worldPos.xyz, 0.05, 3.0, 0.3, normalize(vec2(-0.5, 0.7)));
+    worldPos.xyz += GerstnerWave(worldPos.xyz, 0.2, 1.0, 0.7, normalize(vec2(0.3, -0.2)));
+
+    // REPLACE NORMAL CALCULATION WITH ANALYTIC VERSION
+    normal_tes = vec3(
+        -0.1 * cos(time + worldPos.x * 2.0), // Wave slope X
+        1.0,                                 // Up component
+        -0.1 * cos(time + worldPos.z * 2.0)  // Wave slope Z
+    );
+    normal_tes = normalize(normal_tes);
+
     // 4. Transform through view and projection
     gl_Position = P * V * worldPos;
 
     position_tes = worldPos.xyz;
-
-    // Attribute interpolation
-    normal_tes = mix(
-        mix(normal_te[0], normal_te[1], gl_TessCoord.x),
-        mix(normal_te[3], normal_te[2], gl_TessCoord.x),
-        gl_TessCoord.y
-    );
 
     eye_tes = mix(
         mix(eye_te[0], eye_te[1], gl_TessCoord.x),

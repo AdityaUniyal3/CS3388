@@ -1,10 +1,24 @@
-#version 410 core
+#version 400
 layout(location = 0) in vec3 position;
 layout(location = 1) in vec3 normal;
+layout(location = 2) in vec2 texCoord;
 
-out vec3 position_worldspace;
+out vec3 position_tcs;     // World-space position
+out vec3 normal_tcs;       // World-space normal
+out vec2 uv_tcs;           // Texture coordinates
+out vec3 eye_tcs;          // Eye vector
+out vec3 light_tcs;        // Light vector
+
+uniform mat4 M;            // Model matrix
+uniform mat4 V;            // View matrix
+uniform vec3 lightPos;     // World-space light position
 
 void main() {
-    position_worldspace = position;
-    gl_Position = vec4(position, 1.0); // world position (no MVP here)
+    vec4 worldPos = M * vec4(position, 1.0);
+    position_tcs = worldPos.xyz;
+    normal_tcs = mat3(transpose(inverse(M))) * normal;
+    uv_tcs = texCoord;
+    eye_tcs = vec3(0,0,0) - worldPos.xyz; // Camera at origin
+    light_tcs = lightPos - worldPos.xyz;
+    gl_Position = vec4(position, 1.0);     // Pass-through
 }
